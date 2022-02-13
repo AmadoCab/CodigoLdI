@@ -19,7 +19,7 @@ class PCA:
         else:
             self.n_components = min(data.shape)
 
-    def fit(self, data, rowvar=True):
+    def fit(self, data, rowvar=False):
         self.__valid(data)
         matrix = np.cov(data, rowvar=rowvar)
         eVal, eVec = np.linalg.eigh(matrix)
@@ -27,7 +27,7 @@ class PCA:
         self.eigVal, self.eigVec = eVal[0:self.n_components], eVec[:,0:self.n_components]
         self.variance_ratio = self.eigVal/np.sum(self.eigVal)
 
-    def transform(self, data, axis=0, rowvar=True):
+    def transform(self, data, axis=1, rowvar=False):
         if self.variance_ratio.any():
             if axis == 0:
                 mat = np.array([])
@@ -36,7 +36,7 @@ class PCA:
                     for Fvec in np.transpose(data):
                         row = np.append(row,np.dot(Evec,Fvec))
                     mat = np.append(mat, -row)
-                return mat.reshape((self.n_components,int(mat.shape[0]/self.n_components)))
+                return mat.reshape(self.n_components,(int(mat.shape[0]/self.n_components))).T
             elif axis == 1:
                 mat = np.array([])
                 for Evec in np.transpose(self.eigVec):
@@ -44,7 +44,7 @@ class PCA:
                     for Fvec in data:
                         row = np.append(row,np.dot(Evec,Fvec))
                     mat = np.append(mat, -row)
-                return mat.reshape((self.n_components,int(mat.shape[0]/self.n_components)))
+                return mat.reshape(self.n_components,(int(mat.shape[0]/self.n_components))).T
             else:
                 raise Exception("axis option must be 0 or 1")
         else:
@@ -55,13 +55,17 @@ if __name__ == "__main__":
 
     print("\nPrimero vamos a iniciar nuestros datos:")
     data = np.array([
-            [2,4,6,6,7,5],
-            [3,5,5,7,8,8]
+            [2,3],
+            [4,5],
+            [6,5],
+            [6,7],
+            [7,8],
+            [5,8]
         ])
     print(data)
 
     print("\nAhora vamos a estandarizar los datos:")
-    data_st = z_score(data, axis=1)
+    data_st = z_score(data, axis=0)
     print(data_st)
 
     print("\nPor ultimo visualizamos los datos transformados")
